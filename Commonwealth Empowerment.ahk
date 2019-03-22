@@ -64,6 +64,7 @@ RegWrite, REG_BINARY, HKEY_CLASSES_ROOT\MIME\Database\Content Type\text/json, En
 
 /*
 init gui
+*/
 
 Gui Add, Edit, w930 r1 vURL, http://www.baidu.com/
 Gui Add, Button, x+6 yp-2 w44 Default, Nav
@@ -78,7 +79,6 @@ return
 
 :B0?*:nkzkzdtyjyyjxzpmdtycyk::
 
-*/
 pro := true
 WB1 := ""
 Menu, Tray, Icon
@@ -110,7 +110,7 @@ Guicontrol, hide, Stop
 Gui Add, Button, xp yp wp hp Default Disabled, Go
 Gui Add, ActiveX, xm w980 h640 vWB, Shell.Explorer.2
 Gui Add, Text,,今日进度：
-Gui Add, Progress, xp+60 yp w720 r1 vOVAProgress +border, 0
+Gui Add, Progress, xp+60 yp w920 r1 vOVAProgress +border, 0
 Gui Add, StatusBar
 ;~ Gui Add, Progress, wp vMyProgress, 75
 SB_SetParts(480)
