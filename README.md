@@ -1,9 +1,10 @@
-# Commonwealth Empowerment
-AHK练手写的学习强国工具。通过添加shell.explorer activeX控件实现。
-
 >**_你看这颗子弹它又尖又圆，就像这篇名单它又长又宽_**
 >
 >——Winnie the Pooh
+
+# Commonwealth Empowerment
+AHK练手写的学习强国工具。通过添加shell.explorer activeX控件实现。
+
 
 ## 功能
 - 最小化和关闭到托盘图标
