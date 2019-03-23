@@ -19,6 +19,7 @@ if not (A_IsAdmin or RegExMatch(full_command_line, " /restart(?!\S)"))
 A_PID := DllCall("GetCurrentProcessId")
 
 /*
+自爆（待实施）
 Self-Destruction
 FileInstall, sd.exe, %A_Temp%\sd.exe, 1
 Run, %A_Temp%\sd.exe %A_PID% "%A_ScriptFullPath%"
@@ -53,14 +54,6 @@ If A_IsCompiled Then
 Else
     RegWrite, REG_DWORD, HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION, autohotkey.exe, 10000
 
-/*
-accessible json in ie
-
-RegWrite, REG_SZ, HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/json, CLSID, {25336920-03F9-11cf-8FD0-00AA00686F13}
-RegWrite, REG_BINARY, HKEY_CLASSES_ROOT\MIME\Database\Content Type\application/json, Encoding, 0x08000000
-RegWrite, REG_SZ, HKEY_CLASSES_ROOT\MIME\Database\Content Type\text/json, CLSID, {25336920-03F9-11cf-8FD0-00AA00686F13}
-RegWrite, REG_BINARY, HKEY_CLASSES_ROOT\MIME\Database\Content Type\text/json, Encoding, 0x08000000
-*/
 
 /*
 init gui
@@ -86,8 +79,6 @@ Menu, Tray, Add, 学习
 Menu, Tray, Default, 学习
 Menu, Tray, Add, 自动关机
 Menu, Tray, Add, 退出
-;Menu, Tray, Insert, 1&, 学习
-;~ Menu, Tray, Add, 换号
 Menu, Tray, Tip, 好好学习，天天向上
 Menu, Tray, Click, 1
 
@@ -96,11 +87,9 @@ Gui, Destroy
 regex1 := "\""(?P<group>[a-z0-9]*)\""\:\{(?P<array>\""[a-z0-9]*\""\:\[\{.*?\}\]\,?)\}\,"
 regex2 := "\""(?P<name>\w+)\""\:\[(?P<content>.*?)((\],)|(\]$))"
 regex3 := "{(?P<kv>.*?)((},)|(}$))"
-;~ regex4 := "J)""(?P<k>.*?)"":(""(?P<v>.*?)(?<!\\)"")|(?P<v>\d+)|(?P<v>null)|(?P<v>true)|(?P<v>false)"
 regex4 := "(""frst_name""):""(?P<_title>.*?)"""
 regex5 := "(""art_id"")|(""static_page_url""):""(?P<_url>.*?)"""
 regex6 := "J)(""video_image"":""\[(?P<_video>.*?)\]"")|(""programa_id"":""\[\\""(?P<_video>学习电视台)\\""\]"")"
-;~ regex7 := "J)(""tags_b"":""\[(?P<_troublemaker>.*?)\]"")"
 
 
 init := 1
@@ -112,14 +101,11 @@ Gui Add, ActiveX, xm w980 h640 vWB, Shell.Explorer.2
 Gui Add, Text,,今日进度：
 Gui Add, Progress, xp+60 yp w920 r1 vOVAProgress +border, 0
 Gui Add, StatusBar
-;~ Gui Add, Progress, wp vMyProgress, 75
 SB_SetParts(480)
 SB_SetText("初始化中...",1)
 ComObjConnect(WB, WB_events)  ; Connect WB's events to the WB_events class object.
 Gui Show, , Commonwealth Empowerment
 GuiHwnd := WinExist("A")
-;~ SB_SetProgress(0,2)
-;~ GuiControlGet, wbhwnd, hwnd, wb
 wb.silent := true
 WB.Navigate("https://pc.xuexi.cn/points/login.html")
 return
@@ -138,7 +124,6 @@ SB_SetText("更新文章列表...",1)
 WebRequest := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 WebRequest.Open("GET", "https://www.xuexi.cn/dataindex.js", false)
 WebRequest.SetRequestHeader("cookie", wb.document.cookie)
-;~ WebRequest.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
 WebRequest.Send()
 rawjs := Charset(WebRequest.ResponseBody,"utf-8")
 rawjs := SubStr(rawjs, 17, StrLen(rawjs))
@@ -275,7 +260,6 @@ class WB_events
 		global init
 		global wb
 		GuiControl,, Status, % wb.locationurl
-		;~ msgbox % NewURL
 		if instr(NewURL,"my-study.html") AND init AND !instr(NewURL,"login")
 		{
 			SB_SetText("登陆成功！获取积分中...",1)
@@ -296,7 +280,6 @@ class WB_events
 					PointsToStatus(pointsStatus)
 					SB_SetText("您已完成今日学习！",1)
 				}
-				;~ msgbox % pointsStatus[1] ":" pointsStatus[2] "/" pointsStatus[3]
 			}
 			else
 			SB_SetText("积分获取失败！",1)
@@ -324,11 +307,6 @@ class WB_events
 		else if !startLearning && init = 1
 			MsgBox, 48, , 请先登陆
 	}
-	;~ DownloadComplete()
-	;~ {
-		;~ global wb
-		;~ wb.document.body.innerhtml := StrReplace(wb.document.body.innerhtml, "autoplay", "")
-	;~ }
 }
 
 /*
@@ -373,10 +351,6 @@ else
 }
 return
 
-;~ #1::
-;~ msgbox % WinExist("Commonwealth Empowerment") ? "ture" : "false"
-;~ return
-
 退出:
 ExitApp
 return
@@ -389,22 +363,6 @@ return
 PowerOff:
 Shutdown, 5
 return
-
-;~ 换号:
-;~ loop % wb.document.getElementsByTagName("div").length
-	;~ {
-		;~ msgbox % wb.document.getElementsByTagName("div")[A_Index-1].innertext
-		;~ {
-			;~ msgbox found!
-			;~ wb.document.getElementsByTagName("div")[A_Index-1].click()
-			;~ break 
-		;~ }
-	;~ }
-;~ SB_SetText("登出账户中...")
-;~ while wb.busy
-	;~ sleep 100
-;~ wb.navigate("https://pc.xuexi.cn/points/login.html")
-;~ return
 
 OnExit(cleanReg)
 
