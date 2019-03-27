@@ -362,7 +362,7 @@ AutoShut := AutoShut ? false : true
 return
 
 PowerOff:
-Shutdown, 5
+Shutdown, 9
 return
 
 OnExit(cleanReg)
