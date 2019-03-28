@@ -214,15 +214,15 @@ if (( pointsStatus[5]/pointsStatus[6] + pointsStatus[11]/pointsStatus[12] + poin
 	Guicontrol, hide, Stop
 	Guicontrol, show, Go
 	Guicontrol, Disable, Go
-}
-if AutoShut
-{
-	SetTimer, PowerOff, 60000
-	MsgBox, 262196, 即将关机, 系统将在一分钟后关闭！`n点击“否”取消关机
-	IfMsgBox, No
+	if AutoShut
 	{
-		SetTimer, PowerOff, Off
-		MsgBox, 64, 关机取消, 将不再关闭系统
+		SetTimer, PowerOff, 60000
+		MsgBox, 262196, 即将关机, 系统将在一分钟后关闭！`n点击“否”取消关机
+		IfMsgBox, No
+		{
+			SetTimer, PowerOff, Off
+			MsgBox, 64, 关机取消, 将不再关闭系统
+		}
 	}
 }
 return
