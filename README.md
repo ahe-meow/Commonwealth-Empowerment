@@ -14,7 +14,7 @@ AHK练手写的学习强国工具。通过添加shell.explorer activeX控件实�
 在任意位置输入密文后使用，点击GO开始挂机，STOP终止。
 
 ## 密文是什么？
-请在 **本文** 里寻找
+请在 **本文** 或者 _源码_ 中寻找
 
 ## 声明
 ![GPLv3](https://www.gnu.org/graphics/gplv3-127x51.png)
