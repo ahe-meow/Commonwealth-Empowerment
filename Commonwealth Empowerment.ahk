@@ -90,13 +90,24 @@ regex4 := "(""frst_name""):""(?P<_title>.*?)"""
 regex5 := "(""art_id"")|(""static_page_url""):""(?P<_url>.*?)"""
 regex6 := "J)(""video_image"":""\[(?P<_video>.*?)\]"")|(""programa_id"":""\[\\""(?P<_video>学习电视台)\\""\]"")"
 
+ddlogin_url := 
+( Ltrim Join
+"
+https://login.dingtalk.com/login/index.htm?
+goto=https%3A%2F%2Foapi.dingtalk.com%2Fconnect%2Foauth2%2Fsns_authorize
+%3Fappid%3Ddingoankubyrfkttorhpou%26response_type%3Dcode%26scope%3Dsnsapi_login%
+26redirect_uri%3Dhttps%3A%2F%2Fpc-api.xuexi.cn%2Fopen%2Fapi%2Fsns%2Fcallback
+"
+)
+dd_usr := ""
+dd_pwd := ""
 
 init := 1
 Gui Add, Edit, w930 r1 ReadOnly vStatus, https://pc.xuexi.cn/points/login.html
 Gui Add, Button, x+6 yp-1 w44 r1, Stop
 Guicontrol, hide, Stop
 Gui Add, Button, xp yp wp hp Default Disabled, Go
-Gui Add, ActiveX, xm w980 h640 vWB, Shell.Explorer.2
+Gui Add, ActiveX, xm w980 h640 vWB disabled, Shell.Explorer.2
 Gui Add, Text,,今日进度：
 Gui Add, Progress, xp+60 yp w920 r1 vOVAProgress +border, 0
 Gui Add, StatusBar
@@ -106,7 +117,13 @@ ComObjConnect(WB, WB_events)  ; Connect WB's events to the WB_events class objec
 Gui Show, , Commonwealth Empowerment
 GuiHwnd := WinExist("A")
 wb.silent := true
-WB.Navigate("https://pc.xuexi.cn/points/login.html")
+WB.Navigate(ddlogin_url)
+
+while wb.busy
+	sleep 100
+
+
+
 return
 
 #1:
@@ -262,7 +279,19 @@ class WB_events
 		GuiControl,, Status, % wb.locationurl
 		if instr(NewURL,"my-study.html") AND init AND !instr(NewURL,"login")
 		{
+			if !autoLogin
+			{
+				MsgBox, 36, 提示, 是否保存登陆信息？
+				IfMsgBox, Yes
+				{
+					global dd_usr
+					global dd_pwd					
+					IniWrite, %dd_usr%, Login, INFO, USERNAME
+					IniWrite, %dd_pwd%, Login, INFO, PASSWORD
+				}
+			}
 			SB_SetText("登陆成功！获取积分中...",1)
+				
 			if PointsToStatus()
 			{
 				global pointsStatus
@@ -284,14 +313,51 @@ class WB_events
 			else
 			SB_SetText("积分获取失败！",1)
 		}
-		if instr(NewURL,"dingtalk.com/login")
+		if instr(NewURL,"/points/login")
 		{
+			Guicontrol, enable, WB
 			wb.document.getElementsByClassName("ddloginbox")[0].scrollIntoView()
 			init := 1
 			SetTimer, PointsToStatus, off
 			SB_SetText("请扫码登陆！",1)
 			SB_SetText("",2)
 			GuiControl, disable, Go
+		}
+		/*
+		fetch dingding login info
+		*/
+		if instr(NewURL,"dingtalk.com/login")
+		{
+			if FileExist("Login")
+			{
+				MsgBox, 36, 提示, 是否自动登陆？, 5
+				IfMsgBox, Yes
+				{
+					autoLogin := true
+					IniRead, dd_usr, Login, INFO, USERNAME
+					IniRead, dd_pwd, Login, INFO, PASSWORD
+					wb.document.getElementById("mobile").value := dd_usr
+					wb.document.getElementById("pwd").value := dd_pwd
+					wb.document.getElementById("loginBtn").click()
+				}
+				IfMsgBox, Timeout
+				{
+					autoLogin := true
+					IniRead, dd_usr, Login, INFO, USERNAME
+					IniRead, dd_pwd, Login, INFO, PASSWORD
+					wb.document.getElementById("mobile").value := dd_usr
+					wb.document.getElementById("pwd").value := dd_pwd
+					wb.document.getElementById("loginBtn").click()
+				}
+			}
+		Guicontrol, enable, WB
+		global loginBtn := wb.document.getElementById("loginBtn")		
+		ComObjConnect(loginBtn, "loginBtn_")
+		init := 1
+		SetTimer, PointsToStatus, off
+		SB_SetText("请登陆！",1)
+		SB_SetText("",2)
+		GuiControl, disable, Go
 		}
     }
 	/*
@@ -308,6 +374,13 @@ class WB_events
 		else if !startLearning && init = 1
 			MsgBox, 48, , 请先登陆
 	}
+}
+
+loginBtn_OnClick()
+{
+	global wb
+	global dd_usr := wb.document.getElementById("mobile").value
+	global dd_pwd := wb.document.getElementById("pwd").value
 }
 
 /*
@@ -412,7 +485,7 @@ Charset(data,Charset) ;“data”需在 HTTPRequest 的“opinion”参数中设
 learning(title, url, min)
 {
 	;~ loop 10
-	SB_SetText("学习“" . title . "”...",1)
+	SB_SetText("学习 " . title . " ...",1)
 	global Stop
 	global wb
 	wb.navigate(url)
