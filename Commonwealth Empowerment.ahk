@@ -271,7 +271,7 @@ class WB_events
 				{
 				SB_SetText("积分获取成功！",1)
 				PointsToStatus()
-				SetTimer, PointsToStatus, 60000
+				SetTimer, PointsToStatus, 30000
 				GuiControl, enable, Go
 				}
 				else
