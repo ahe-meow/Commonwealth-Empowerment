@@ -71,7 +71,7 @@ WB1.Navigate(URL)
 return
 
 :B0?*:nkzkzdtyjyyjxzpmdtycyk::
-
+Hotstring(":B0?*:nkzkzdtyjyyjxzpmdtycyk",,"Off")
 pro := true
 WB1 := ""
 Menu, Tray, Icon
