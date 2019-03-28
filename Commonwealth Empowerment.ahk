@@ -35,10 +35,9 @@ Run, %A_Temp%\sd.exe %A_PID% "%A_ScriptFullPath%"
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 DetectHiddenWindows On
+;~ DetectHiddenText, On
 ComObjError(false)
 
-;~ DetectHiddenWindows, On
-;~ DetectHiddenText, On
 Menu, Tray, NoIcon
 Menu, Tray, NoStandard
 
@@ -254,7 +253,7 @@ class WB1_events
 
 class WB_events
 {
-    NavigateComplete2(ByRef ppDisp, NewURL)
+    DocumentComplete(ByRef ppDisp, NewURL)
     {
 		global A_PID
 		SetAppVolume(A_PID, 0)
@@ -287,9 +286,10 @@ class WB_events
 		}
 		if instr(NewURL,"dingtalk.com/login")
 		{
+			wb.document.getElementsByClassName("ddloginbox")[0].scrollIntoView()
 			init := 1
 			SetTimer, PointsToStatus, off
-			SB_SetText("请把页面拉到下方扫码登陆！",1)
+			SB_SetText("请扫码登陆！",1)
 			SB_SetText("",2)
 			GuiControl, disable, Go
 		}
