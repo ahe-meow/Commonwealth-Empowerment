@@ -16,6 +16,12 @@ AHK练手写的学习强国工具。通过添加shell.explorer activeX控件实�
 ## 密文是什么？
 请在 **本文** 或者 _源码_ 中寻找
 
+## 三“不”一“没有”
+- 不维护 
+- 不接单 
+- 不教学 
+- 没有时间 
+
 ## 声明
 ![GPLv3](https://www.gnu.org/graphics/gplv3-127x51.png)
 
