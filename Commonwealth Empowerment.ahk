@@ -151,7 +151,7 @@ while p1 := RegExMatch(rawjs, regex1, art, p1 + StrLen(art))
 			p := RegExMatch(pairkv, regex6, article)
 			;~ p := RegExMatch(pairkv, regex7, article)
 			article_video := article_video ? 1 : 0
-			if article_video && article_title && article_url ;&&!_troublemaker
+			if article_video && article_title && inStr(article_url, "cf94877c29e1c685574e0226618fb1be") ;&&!_troublemaker
 			{
 				b += 1
 				videolist[b,1] := article_title
@@ -159,7 +159,7 @@ while p1 := RegExMatch(rawjs, regex1, art, p1 + StrLen(art))
 				
 				;~ videolist .= article_title "," article_url "`n"
 			}
-			else if article_title && article_url ;&&!_troublemaker
+			else if article_title && inStr(article_url, "e43e220633a65f9b6d8b53712cba9caa")  ;&&!_troublemaker
 			{
 				a += 1
 				articlelist[a,1] := article_title
