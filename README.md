@@ -9,7 +9,7 @@ AHK练手写的学习强国工具。通过添加shell.explorer activeX控件实�
 - 最小化和关闭到托盘图标
 - 自动关机（右键点击托盘图标选择）
 - 老板键（Win+`）
-- 自动登录（感谢[熊猫学习](https://github.com/Alivon/Panda-Learning)）
+- 扫码或账密登录可选（感谢[熊猫学习](https://github.com/Alivon/Panda-Learning)）
 - _“自动开始”建设中…_
 
 ## 使用方法
