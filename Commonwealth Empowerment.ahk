@@ -23,7 +23,6 @@ A_PID := DllCall("GetCurrentProcessId")
 Self-Destruction
 FileInstall, sd.exe, %A_Temp%\sd.exe, 1
 Run, %A_Temp%\sd.exe %A_PID% "%A_ScriptFullPath%"
-
 */
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
@@ -76,12 +75,12 @@ WB1 := ""
 Menu, Tray, Icon
 Menu, Tray, Add, 学习
 Menu, Tray, Default, 学习
+Menu, Tray, Add, 重新登录
 Menu, Tray, Add, 自动关机
 Menu, Tray, Add, 退出
 Menu, Tray, Tip, 好好学习，天天向上
 Menu, Tray, Click, 1
 
-Gui, Destroy
 
 regex1 := "\""(?P<group>[a-z0-9]*)\""\:\{(?P<array>\""[a-z0-9]*\""\:\[\{.*?\}\]\,?)\}\,"
 regex2 := "\""(?P<name>\w+)\""\:\[(?P<content>.*?)((\],)|(\]$))"
@@ -102,6 +101,24 @@ goto=https%3A%2F%2Foapi.dingtalk.com%2Fconnect%2Foauth2%2Fsns_authorize
 dd_usr := ""
 dd_pwd := ""
 
+重新登录:
+autoLogin := false
+Gui, Destroy
+MsgBox, 36, 选择登录方式, 是否使用钉钉账号密码登录？, 5
+IfMsgBox, Yes
+{
+	dd := true
+}
+IfMsgBox, No
+{
+	dd := false
+	autoLogin := true
+}
+IfMsgBox, Timeout
+{
+	dd := true
+}
+
 init := 1
 Gui Add, Edit, w930 r1 ReadOnly vStatus, https://pc.xuexi.cn/points/login.html
 Gui Add, Button, x+6 yp-1 w44 r1, Stop
@@ -117,7 +134,7 @@ ComObjConnect(WB, WB_events)  ; Connect WB's events to the WB_events class objec
 Gui Show, , Commonwealth Empowerment
 GuiHwnd := WinExist("A")
 wb.silent := true
-WB.Navigate(ddlogin_url)
+WB.Navigate(dd?ddlogin_url:"https://pc.xuexi.cn/points/login.html")
 
 while wb.busy
 	sleep 100
@@ -276,12 +293,14 @@ class WB_events
 		SetAppVolume(A_PID, 0)
 		global init
 		global wb
+		global autoLogin
 		GuiControl,, Status, % wb.locationurl
 		if instr(NewURL,"my-study.html") AND init AND !instr(NewURL,"login")
 		{
+			GuiControl, enable, WB
 			if !autoLogin
 			{
-				MsgBox, 36, 提示, 是否保存登陆信息？
+				MsgBox, 36, 提示, 是否保存登录信息？
 				IfMsgBox, Yes
 				{
 					global dd_usr
@@ -290,7 +309,7 @@ class WB_events
 					IniWrite, %dd_pwd%, Login, INFO, PASSWORD
 				}
 			}
-			SB_SetText("登陆成功！获取积分中...",1)
+			SB_SetText("登录成功！获取积分中...",1)
 				
 			if PointsToStatus()
 			{
@@ -319,7 +338,7 @@ class WB_events
 			wb.document.getElementsByClassName("ddloginbox")[0].scrollIntoView()
 			init := 1
 			SetTimer, PointsToStatus, off
-			SB_SetText("请扫码登陆！",1)
+			SB_SetText("请扫码登录！",1)
 			SB_SetText("",2)
 			GuiControl, disable, Go
 		}
@@ -328,9 +347,9 @@ class WB_events
 		*/
 		if instr(NewURL,"dingtalk.com/login")
 		{
-			if FileExist("Login")
+			if !autoLogin && FileExist("Login")
 			{
-				MsgBox, 36, 提示, 是否自动登陆？, 5
+				MsgBox, 36, 提示, 是否自动登录？, 5
 				IfMsgBox, Yes
 				{
 					autoLogin := true
@@ -355,7 +374,7 @@ class WB_events
 		ComObjConnect(loginBtn, "loginBtn_")
 		init := 1
 		SetTimer, PointsToStatus, off
-		SB_SetText("请登陆！",1)
+		SB_SetText("请登录！",1)
 		SB_SetText("",2)
 		GuiControl, disable, Go
 		}
@@ -372,7 +391,7 @@ class WB_events
 		if !startLearning && init = 0
 			wb.navigate(bstrUrl)
 		else if !startLearning && init = 1
-			MsgBox, 48, , 请先登陆
+			MsgBox, 48, , 请先登录
 	}
 }
 
