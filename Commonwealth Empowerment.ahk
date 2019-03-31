@@ -19,8 +19,8 @@ if not (A_IsAdmin or RegExMatch(full_command_line, " /restart(?!\S)"))
 A_PID := DllCall("GetCurrentProcessId")
 
 /*
-自爆（待实施）
-Self-Destruction
+Self-Destruction (developing...)
+
 FileInstall, sd.exe, %A_Temp%\sd.exe, 1
 Run, %A_Temp%\sd.exe %A_PID% "%A_ScriptFullPath%"
 */
@@ -76,11 +76,12 @@ Menu, Tray, Icon
 Menu, Tray, Add, 学习
 Menu, Tray, Default, 学习
 Menu, Tray, Add, 重新登录
-Menu, Tray, Add, 自动关机
+Menu, Sub, Add, 自动关机
+Menu, Sub, Add, 退出程序
+Menu, Tray, Add, 完成后, :Sub
 Menu, Tray, Add, 退出
 Menu, Tray, Tip, 好好学习，天天向上
 Menu, Tray, Click, 1
-
 
 regex1 := "\""(?P<group>[a-z0-9]*)\""\:\{(?P<array>\""[a-z0-9]*\""\:\[\{.*?\}\]\,?)\}\,"
 regex2 := "\""(?P<name>\w+)\""\:\[(?P<content>.*?)((\],)|(\]$))"
@@ -139,12 +140,6 @@ WB.Navigate(dd?ddlogin_url:"https://pc.xuexi.cn/points/login.html")
 while wb.busy
 	sleep 100
 
-
-
-return
-
-#1:
-KeyHistory
 return
 
 ; Continue on to load the initial page:
@@ -248,6 +243,16 @@ if (( pointsStatus[5]/pointsStatus[6] + pointsStatus[11]/pointsStatus[12] + poin
 	Guicontrol, hide, Stop
 	Guicontrol, show, Go
 	Guicontrol, Disable, Go
+	if AutoExit
+	{
+		SetTimer, 退出, 6000
+		MsgBox, 262196, 即将退出, 程序将在一分钟后退出！`n点击“否”取消退出
+		IfMsgBox, No
+		{
+			SetTimer, 退出, Off
+			MsgBox, 64, 退出取消, 将不再退出程序
+		}
+	}
 	if AutoShut
 	{
 		SetTimer, PowerOff, 60000
@@ -402,9 +407,6 @@ loginBtn_OnClick()
 	global dd_pwd := wb.document.getElementById("pwd").value
 }
 
-/*
-on exit
-*/
 
 GuiClose:
 GuiEscape:
@@ -449,14 +451,32 @@ ExitApp
 return
 
 自动关机:
-Menu, Tray, ToggleCheck, 自动关机
+Menu, sub, ToggleCheck, 自动关机
 AutoShut := AutoShut ? false : true
+if AutoExit
+{
+	Menu, sub, UnCheck, 退出程序
+	AutoExit := false
+}
+return
+
+退出程序:
+Menu, sub, ToggleCheck, 退出程序
+AutoExit := AutoExit ? false : true
+if AutoExit
+{
+	Menu, sub, UnCheck, 自动关机
+	AutoShut := false
+}
 return
 
 PowerOff:
 Shutdown, 9
 return
 
+/*
+on exit
+*/
 OnExit(cleanReg)
 
 QueryPoints(cookie := "")
