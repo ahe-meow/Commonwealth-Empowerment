@@ -221,7 +221,7 @@ progress := pointsStatus[5]/pointsStatus[6] * pointsStatus[11]/pointsStatus[12]
 while progress < 1 && !Stop
 {
 	random, rand, 0, a
-	learning(articlelist[rand,1], articlelist[rand,2], 3)
+	learning(articlelist[rand,1], articlelist[rand,2], 2)
 	progress := pointsStatus[5]/pointsStatus[6] * pointsStatus[11]/pointsStatus[12]
 }
 
@@ -233,7 +233,7 @@ progress := pointsStatus[8]/pointsStatus[9] * pointsStatus[14]/pointsStatus[15]
 while progress < 1 && !Stop
 {
 	random, rand, 0, b
-	learning(videolist[rand,1], videolist[rand,2], 4)
+	learning(videolist[rand,1], videolist[rand,2], 3)
 	progress := pointsStatus[8]/pointsStatus[9] * pointsStatus[14]/pointsStatus[15]
 }
 SetTimer, PointsToStatus, Off
