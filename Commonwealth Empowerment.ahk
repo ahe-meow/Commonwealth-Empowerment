@@ -26,7 +26,6 @@ Run, %A_Temp%\sd.exe %A_PID% "%A_ScriptFullPath%"
 */
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Include JSON.ahk
 #SingleInstance Ignore
 ;~ #InstallKeybdHook
 ;~ #InstallMouseHook
@@ -480,7 +479,9 @@ on exit
 OnExit(cleanReg)
 
 QueryPoints(cookie := "")
-{
+{	
+	pos := 1
+	regPattern := "O){""ruleId"":(.*?),""name"":""(.*?)"",""desc"":""(.*?)"",""currentScore"":(.*?),""dayMaxScore"":(.*?)}"
 	;~ msgbox % cookie
 	if !cookie
 	{
@@ -492,9 +493,17 @@ QueryPoints(cookie := "")
 	WebRequest.SetRequestHeader("cookie",cookie)
 	WebRequest.SetRequestHeader("referer","https://pc.xuexi.cn/points/my-study.html")
 	WebRequest.Send()
-	value := JSON.Load(WebRequest.ResponseText)
+	res := WebRequest.ResponseText
 	WebRequest := ""
-	points := [value.data.9.name, value.data.9.currentScore, value.data.9.dayMaxScore, value.data.1.name, value.data.1.currentScore, value.data.1.dayMaxScore, value.data.2.name, value.data.2.currentScore, value.data.2.dayMaxScore, value.data.10.name, value.data.10.currentScore, value.data.10.dayMaxScore, value.data.12.name, value.data.12.currentScore, value.data.12.dayMaxScore]
+	while(pos){
+		prv := A_Index-1
+		pos := RegExMatch(res, regPattern, ScoreItem%A_index%, pos+(ScoreItem%prv%.len(0)?ScoreItem%prv%.len(0):0))
+	}
+	points := [ScoreItem9.2, ScoreItem9.4, ScoreItem9.5
+			, ScoreItem1.2, ScoreItem1.4, ScoreItem1.5
+			, ScoreItem2.2, ScoreItem2.4, ScoreItem2.5
+			, ScoreItem10.2, ScoreItem10.4, ScoreItem10.5
+			, ScoreItem12.2, ScoreItem12.4, ScoreItem12.5]
 	return points
 }
 
