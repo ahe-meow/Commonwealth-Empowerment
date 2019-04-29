@@ -26,7 +26,7 @@ Run, %A_Temp%\sd.exe %A_PID% "%A_ScriptFullPath%"
 */
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-#SingleInstance Ignore
+;~ #SingleInstance Ignore
 ;~ #InstallKeybdHook
 ;~ #InstallMouseHook
 ; #Warn  ; Enable warnings to assist with detecting common errors.
@@ -35,6 +35,13 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 DetectHiddenWindows On
 ;~ DetectHiddenText, On
 ComObjError(false)
+OnExit("cleanReg")
+
+TaskName := "Commonwealth Empowerment"
+service := ComObjCreate("Schedule.Service")
+service.Connect()
+rootFolder := service.GetFolder("\")
+TaskEnabled := Service.GetFolder(rootFolder).GetTask(TaskName).Enabled
 
 Menu, Tray, NoIcon
 Menu, Tray, NoStandard
@@ -67,6 +74,7 @@ Gui Submit, NoHide
 WB1.Navigate(URL)
 return
 
+
 :B0?*:nkzkzdtyjyyjxzpmdtycyk::
 Hotstring(":B0?*:nkzkzdtyjyyjxzpmdtycyk",,"Off")
 pro := true
@@ -78,6 +86,12 @@ Menu, Tray, Add, 重新登录
 Menu, Sub, Add, 自动关机
 Menu, Sub, Add, 退出程序
 Menu, Tray, Add, 完成后, :Sub
+Menu, Tray, Add, 计划任务
+if TaskEnabled
+{
+	AutoRestart := true
+	Menu, Tray, Check, 计划任务
+}
 Menu, Tray, Add, 退出
 Menu, Tray, Tip, 好好学习，天天向上
 Menu, Tray, Click, 1
@@ -98,11 +112,12 @@ goto=https%3A%2F%2Foapi.dingtalk.com%2Fconnect%2Foauth2%2Fsns_authorize
 26redirect_uri%3Dhttps%3A%2F%2Fpc-api.xuexi.cn%2Fopen%2Fapi%2Fsns%2Fcallback
 "
 )
+
 dd_usr := ""
 dd_pwd := ""
 
 重新登录:
-autoLogin := false
+AutoLogin := false
 Gui, Destroy
 MsgBox, 36, 选择登录方式, 是否使用钉钉账号密码登录？, 5
 IfMsgBox, Yes
@@ -112,7 +127,7 @@ IfMsgBox, Yes
 IfMsgBox, No
 {
 	dd := false
-	autoLogin := true
+	AutoLogin := true
 }
 IfMsgBox, Timeout
 {
@@ -130,7 +145,7 @@ Gui Add, Progress, xp+60 yp w920 r1 vOVAProgress +border, 0
 Gui Add, StatusBar
 SB_SetParts(480)
 SB_SetText("初始化中...",1)
-ComObjConnect(WB, WB_events)  ; Connect WB's events to the WB_events class object.
+ComObjConnect(WB, WB_events)
 Gui Show, , Commonwealth Empowerment
 GuiHwnd := WinExist("A")
 wb.silent := true
@@ -235,7 +250,6 @@ while progress < 1 && !Stop
 	learning(videolist[rand,1], videolist[rand,2], 3)
 	progress := pointsStatus[8]/pointsStatus[9] * pointsStatus[14]/pointsStatus[15]
 }
-SetTimer, PointsToStatus, Off
 if (( pointsStatus[5]/pointsStatus[6] + pointsStatus[11]/pointsStatus[12] + pointsStatus[8]/pointsStatus[9] + pointsStatus[14]/pointsStatus[15] ) / 4 * 100) >= 100
 {
 	SB_SetText("您已完成今日学习！",1)
@@ -297,12 +311,12 @@ class WB_events
 		SetAppVolume(A_PID, 0)
 		global init
 		global wb
-		global autoLogin
+		global AutoLogin
 		GuiControl,, Status, % wb.locationurl
 		if instr(NewURL,"my-study.html") AND init AND !instr(NewURL,"login")
 		{
 			GuiControl, enable, WB
-			if !autoLogin
+			if !AutoLogin
 			{
 				MsgBox, 36, 提示, 是否保存登录信息？
 				IfMsgBox, Yes
@@ -321,10 +335,20 @@ class WB_events
 				init := 0
 				if (( pointsStatus[5]/pointsStatus[6] + pointsStatus[11]/pointsStatus[12] + pointsStatus[8]/pointsStatus[9] + pointsStatus[14]/pointsStatus[15] ) / 4 * 100) < 100
 				{
-				SB_SetText("积分获取成功！",1)
-				PointsToStatus()
-				SetTimer, PointsToStatus, 30000
-				GuiControl, enable, Go
+					SB_SetText("积分获取成功！",1)
+					PointsToStatus()
+					SetTimer, PointsToStatus, 60000
+					GuiControl, enable, Go
+					MsgBox, 36, 提示, 是否自动开始学习？, 5
+					IfMsgBox, Yes
+				{
+					gosub, ButtonGO
+				}
+				IfMsgBox, Timeout
+				{
+					gosub, ButtonGO
+				}
+				
 				}
 				else
 				{
@@ -334,7 +358,9 @@ class WB_events
 				}
 			}
 			else
-			SB_SetText("积分获取失败！",1)
+			{
+				SB_SetText("积分获取失败！",1)
+			}
 		}
 		if instr(NewURL,"/points/login")
 		{
@@ -351,12 +377,12 @@ class WB_events
 		*/
 		if instr(NewURL,"dingtalk.com/login")
 		{
-			if !autoLogin && FileExist("Login")
+			if !AutoLogin && FileExist("Login")
 			{
 				MsgBox, 36, 提示, 是否自动登录？, 5
 				IfMsgBox, Yes
 				{
-					autoLogin := true
+					AutoLogin := true
 					IniRead, dd_usr, Login, INFO, USERNAME
 					IniRead, dd_pwd, Login, INFO, PASSWORD
 					wb.document.getElementById("mobile").value := dd_usr
@@ -365,7 +391,7 @@ class WB_events
 				}
 				IfMsgBox, Timeout
 				{
-					autoLogin := true
+					AutoLogin := true
 					IniRead, dd_usr, Login, INFO, USERNAME
 					IniRead, dd_pwd, Login, INFO, PASSWORD
 					wb.document.getElementById("mobile").value := dd_usr
@@ -469,6 +495,12 @@ if AutoExit
 }
 return
 
+计划任务:
+Menu, Tray, ToggleCheck, 计划任务
+AutoRestart := AutoRestart ? false : true
+SetScheduledTask(AutoRestart)
+return
+
 PowerOff:
 Shutdown, 9
 return
@@ -476,7 +508,6 @@ return
 /*
 on exit
 */
-OnExit(cleanReg)
 
 QueryPoints(cookie := "")
 {	
@@ -560,15 +591,13 @@ PointsToStatus(points := "")
 	if points
 	{	
 		global pointsStatus := points
+		loop 5
 		{
-			loop 5
-			{
-				s .= pointsStatus[1+3*(A_Index-1)] ":" pointsStatus[2+3*(A_Index-1)] "/" pointsStatus[3+3*(A_Index-1)] (A_Index<5 ? ", " : "")
-			}
-			SB_SetText(A_Tab A_Tab s,2)
-			OVAProgress := ( pointsStatus[5]/pointsStatus[6] + pointsStatus[11]/pointsStatus[12] + pointsStatus[8]/pointsStatus[9] + pointsStatus[14]/pointsStatus[15] ) / 4 * 100
-			GuiControl,, OVAProgress, %OVAProgress%
+			s .= pointsStatus[1+3*(A_Index-1)] ":" pointsStatus[2+3*(A_Index-1)] "/" pointsStatus[3+3*(A_Index-1)] (A_Index<5 ? ", " : "")
 		}
+		SB_SetText(A_Tab A_Tab s,2)
+		OVAProgress := ( pointsStatus[5]/pointsStatus[6] + pointsStatus[11]/pointsStatus[12] + pointsStatus[8]/pointsStatus[9] + pointsStatus[14]/pointsStatus[15] ) / 4 * 100
+		GuiControl,, OVAProgress, %OVAProgress%
 	}
 	else
 		SB_SetText("获取积分失败！",1)
@@ -606,4 +635,42 @@ SetAppVolume(pid, MasterVolume)    ; WIN_V+
         ObjRelease(IAudioSessionControl2)
     }
     ObjRelease(IAudioSessionEnumerator)
+}
+
+SetScheduledTask(Enabled := true)
+{
+	TriggerTypeDaily := 2
+	ActionTypeExec := 0
+	TaskName := "Commonwealth Empowerment"
+	service := ComObjCreate("Schedule.Service")
+	service.Connect()
+	
+	rootFolder := service.GetFolder("\")
+	taskDefinition := service.NewTask(0)
+	regInfo := taskDefinition.RegistrationInfo
+	regInfo.Description := "每日学习强国"
+	regInfo.Author := "Ahe_Meow"
+	
+	settings := taskDefinition.Settings
+	settings.Enabled := True
+	settings.StartWhenAvailable := True
+	settings.Hidden := False
+	
+	triggers := taskDefinition.Triggers
+	trigger := triggers.Create(TriggerTypeDaily)
+	
+	startTime := "1970-01-01T05:00:00"
+	;~ endTime := "2970-01-01T05:00:00"
+
+	trigger.StartBoundary := startTime
+	;~ trigger.EndBoundary := endTime
+	trigger.DaysInterval := 1
+	trigger.Id := "DailyTriggerId"
+	trigger.Enabled := True
+	
+	Action := taskDefinition.Actions.Create( ActionTypeExec )
+	Action.Path := A_ScriptFullPath "-silent"
+
+	rootFolder.RegisterTaskDefinition(TaskName, taskDefinition, 6 ,"","", 3)
+	Service.GetFolder(rootFolder).GetTask(TaskName).Enabled := Enabled
 }
